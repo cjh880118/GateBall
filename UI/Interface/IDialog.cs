@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
-using CellBig.Constants;
+using JHchoi.Constants;
 using JHC;
 
-namespace CellBig.UI
+namespace JHchoi.UI
 {
 	public class IDialog : MonoBehaviour
 	{

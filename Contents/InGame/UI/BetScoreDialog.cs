@@ -1,4 +1,4 @@
-﻿using CellBig.UI.Event;
+﻿using JHchoi.UI.Event;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-namespace CellBig.UI
+namespace JHchoi.UI
 {
     public class BetScoreDialog : IDialog
     {

@@ -1,4 +1,4 @@
-﻿namespace CellBig.Contents.Event
+﻿namespace JHchoi.Contents.Event
 {
 	public class EnterContentMsg : Message
 	{

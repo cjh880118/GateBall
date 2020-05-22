@@ -1,10 +1,10 @@
-﻿using CellBig.Constants;
+﻿using JHchoi.Constants;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CellBig.Models
+namespace JHchoi.Models
 {
     public class BetModeModel : Model
     {

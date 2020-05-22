@@ -1,13 +1,13 @@
-﻿using CellBig.Constants;
-using CellBig.Models;
-using CellBig.T3;
-using CellBig.UI.Event;
+﻿using JHchoi.Constants;
+using JHchoi.Models;
+using JHchoi.T3;
+using JHchoi.UI.Event;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CellBig.Contents
+namespace JHchoi.Contents
 {
     public class MissionModeUIContent : IContent
     {

@@ -1,11 +1,11 @@
-﻿using CellBig.Models;
-using CellBig.UI.Event;
+﻿using JHchoi.Models;
+using JHchoi.UI.Event;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CellBig.Contents {
+namespace JHchoi.Contents {
     public abstract class IMissionSucessCheck : IContent
     {
         protected SettingModel settingModel;

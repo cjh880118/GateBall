@@ -1,9 +1,9 @@
-﻿using CellBig.Constants;
-using CellBig.Models;
-using CellBig.UI.Event;
+﻿using JHchoi.Constants;
+using JHchoi.Models;
+using JHchoi.UI.Event;
 using UnityEngine;
 
-namespace CellBig.Contents
+namespace JHchoi.Contents
 {
     public class KioskLobbyContent : IContent
     {

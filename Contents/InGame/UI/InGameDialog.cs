@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using CellBig.UI.Event;
+using JHchoi.UI.Event;
 using System;
-using CellBig.Constants;
+using JHchoi.Constants;
 
-namespace CellBig.UI
+namespace JHchoi.UI
 {
     public class InGameDialog : IDialog
     {

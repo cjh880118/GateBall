@@ -1,14 +1,14 @@
 ﻿using System.Collections;
 using UnityEngine;
-using CellBig.UI.Event;
-using CellBig.T3;
-using CellBig.Models;
+using JHchoi.UI.Event;
+using JHchoi.T3;
+using JHchoi.Models;
 using System;
-using CellBig.Constants;
+using JHchoi.Constants;
 using System.Collections.Generic;
 using UnityEngine.Rendering.PostProcessing;
 
-namespace CellBig.Contents
+namespace JHchoi.Contents
 {
     public class BetModeContent : IContent
     {

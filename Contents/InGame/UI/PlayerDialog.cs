@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
-using CellBig.UI.Event;
+using JHchoi.UI.Event;
 using UnityEngine.UI;
-using CellBig.Constants;
+using JHchoi.Constants;
 using System;
 
-namespace CellBig.UI
+namespace JHchoi.UI
 {
     public class PlayerDialog : IDialog
     {

@@ -1,12 +1,12 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using CellBig.UI.Event;
-using CellBig.Constants;
+using JHchoi.UI.Event;
+using JHchoi.Constants;
 using System;
 using UnityEngine.Video;
 
-namespace CellBig.UI
+namespace JHchoi.UI
 {
     public class MissionScoreDialog : IDialog
     {

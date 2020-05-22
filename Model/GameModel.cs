@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using CellBig.Constants;
+using JHchoi.Constants;
 
-namespace CellBig.Models
+namespace JHchoi.Models
 {
     public class GameModel : Model
     {

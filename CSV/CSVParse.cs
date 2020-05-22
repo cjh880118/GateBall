@@ -6,7 +6,7 @@ using System.IO;
 using UnityEngine;
 using System.Collections;
 using System.Text.RegularExpressions;
-using CellBig.Models;
+using JHchoi.Models;
 
 public class CSVParse
 {

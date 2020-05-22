@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CellBig.UI
+namespace JHchoi.UI
 {
     public class AlertDialog : IDialog
     {

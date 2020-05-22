@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using UnityEngine;
-using CellBig.UI.Event;
-using CellBig.Models;
-using CellBig.Constants;
+using JHchoi.UI.Event;
+using JHchoi.Models;
+using JHchoi.Constants;
 
-namespace CellBig.Contents
+namespace JHchoi.Contents
 {
     public class BetModeBall_Controller : MonoBehaviour
     {

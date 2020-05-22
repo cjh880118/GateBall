@@ -1,9 +1,9 @@
-﻿using CellBig.Constants;
+﻿using JHchoi.Constants;
 using System.Collections.Generic;
 using UnityEngine;
-using CellBig.Contents;
+using JHchoi.Contents;
 
-namespace CellBig.UI.Event
+namespace JHchoi.UI.Event
 {
     public class LoadingCompleteMsg : Message
     {

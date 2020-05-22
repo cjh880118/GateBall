@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using CellBig.Contents;
-using CellBig.Constants;
+using JHchoi.Contents;
+using JHchoi.Constants;
 
-namespace CellBig.Models
+namespace JHchoi.Models
 {
     public class PlayerModel : Model
     {

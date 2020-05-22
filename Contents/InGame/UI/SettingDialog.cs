@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using CellBig.Models;
-using CellBig.UI.Event;
+using JHchoi.Models;
+using JHchoi.UI.Event;
 using System;
 
-namespace CellBig.UI
+namespace JHchoi.UI
 {
     public class SettingDialog : IDialog
     {

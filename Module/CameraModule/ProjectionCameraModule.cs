@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using CellBig.UI;
-using CellBig.Models;
+using JHchoi.UI;
+using JHchoi.Models;
 
-namespace CellBig.Module
+namespace JHchoi.Module
 {
     public class ProjectionCameraModule : IModule
     {

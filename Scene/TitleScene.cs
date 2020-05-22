@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using CellBig.UI.Event;
+using JHchoi.UI.Event;
 
-namespace CellBig.Scene
+namespace JHchoi.Scene
 {
     public class TitleScene : IScene
     {

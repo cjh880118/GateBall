@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using CellBig.UI.Event;
+using JHchoi.UI.Event;
 
-namespace CellBig.UI
+namespace JHchoi.UI
 {
     public class KioskTitleDialog : IDialog
     {

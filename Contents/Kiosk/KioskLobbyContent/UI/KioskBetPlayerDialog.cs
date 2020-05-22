@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using CellBig.UI.Event;
+using JHchoi.UI.Event;
 using System.Runtime.InteropServices;
 
-namespace CellBig.UI
+namespace JHchoi.UI
 {
     public class KioskBetPlayerDialog : IDialog
     {

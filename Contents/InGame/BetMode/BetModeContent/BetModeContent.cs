@@ -10,12 +10,12 @@ using UnityEngine.Rendering.PostProcessing;
 
 namespace JHchoi.Contents
 {
-    public class BetModeContent : IContent
+    public class BetModeContent : IGateBall
     {
         static string TAG = "BetModeContent :: ";
 
-        GameObject Red_Ball;
-        GameObject White_Ball;
+        //GameObject Red_Ball;
+        //GameObject White_Ball;
 
         BetModeBall_Controller red_Ball_Controller;
         BetModeBall_Controller white_Ball_Controller;
@@ -34,33 +34,22 @@ namespace JHchoi.Contents
 
         Vector3 force;
 
-        [Header("<Test Input Sensor>")]
-        public Vector3 firstSensor;
-        public float firstTime;
-        public Vector3 SecondSensor;
-        public float secondTime;
+        //[Header("<Test Input Sensor>")]
+        //public Vector3 firstSensor;
+        //public float firstTime;
+        //public Vector3 SecondSensor;
+        //public float secondTime;
 
-        [Header("<Sensor Value>")]
-        float sensorDistance;
-        float forceScale;
-
-        public float sensor1Scale = 1f;
-        public float sensor1Offset = 0f;
-        public float sensor2Scale = 1f;
-        public float sensor2Offset = 0f;
+        //[Header("<Sensor Value>")]
+        //float sensorDistance;
+        //float forceScale;
 
         SettingModel settingModel;
         PlayersModel playersModel;
         InGamePlayModel inGameplayModel;
         BetModeModel betModeModel;
-
-        GameObject ModuleManager;
-
         MissionLevelSettingModel levelSettingModel;
-
-        Camera_Controller inGameCamera;
-        Camera frontCamera;
-
+    
         Vector3 startPosition;
         Vector3 startRotation;
 
@@ -70,13 +59,6 @@ namespace JHchoi.Contents
         bool isPlayPossible;
         public bool IsPlayPossible { get => isPlayPossible; set => isPlayPossible = value; }
         //Vector3 vecTargetObj;
-
-        public PostProcessProfile postProcessProfile;
-        GameObject inGame;
-        GameObject targetArrow;
-        GameObject missionEffet;
-
-        List<Coroutine> ListSoundLoop = new List<Coroutine>();
 
         //test
         string testMode1;

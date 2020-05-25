@@ -11,12 +11,12 @@ using Random = UnityEngine.Random;
 
 namespace JHchoi.Contents
 {
-    public class MissionModeContent : IContent
+    public class MissionModeContent : IGateBall
     {
         static string TAG = "MissionModeContent :: ";
 
-        GameObject Red_Ball;
-        GameObject White_Ball;
+        //GameObject Red_Ball;
+        //GameObject White_Ball;
 
         //터치 장애물 볼
         GameObject[] Player_Touch_Ball;
@@ -33,33 +33,22 @@ namespace JHchoi.Contents
         Vector3 cameraRotation;
         Vector3 force;
 
-        [Header("<Test Input Sensor>")]
-        public Vector3 firstSensor;
-        public float firstTime;
-        public Vector3 SecondSensor;
-        public float secondTime;
+        //[Header("<Test Input Sensor>")]
+        //public Vector3 firstSensor;
+        //public float firstTime;
+        //public Vector3 SecondSensor;
+        //public float secondTime;
 
-        [Header("<Sensor Value>")]
-        float sensorDistance;
-        float forceScale;
-
-        public float sensor1Scale = 1f;
-        public float sensor1Offset = 0f;
-        public float sensor2Scale = 1f;
-        public float sensor2Offset = 0f;
+        //[Header("<Sensor Value>")]
+        //float sensorDistance;
+        //float forceScale;
 
         SettingModel settingModel;
         PlayersModel playersModel;
-
-        GameObject ModuleManager;
         InGamePlayModel inGameplayModel;
         CameraModel cameraModel;
-
         MissionLevelSettingModel levelSettingModel;
         TouchBallSettingModel touchBallSettingModel;
-
-        Camera_Controller inGameCamera;
-        Camera frontCamera;
 
         Vector3 startPosition;
         Vector3 startRotation;
@@ -67,20 +56,20 @@ namespace JHchoi.Contents
         int totalPlayerCount;
         int totalPlayRound;
         bool isPlayPossible;
-        public bool IsPlayPossible { get => isPlayPossible; set => isPlayPossible = value; }
         float goalDistance;
+
+        public bool IsPlayPossible { get => isPlayPossible; set => isPlayPossible = value; }
+        
         public float GoalDistance { get => goalDistance; set => goalDistance = value; }
 
-        public PostProcessProfile postProcessProfile;
-        GameObject inGame;
-        GameObject targetArrow;
-        GameObject missionEffet;
 
-        List<Coroutine> ListSoundLoop = new List<Coroutine>();
+        
         #region Contents Load
 
         protected override void OnLoadStart()
         {
+            base.OnLoadStart();
+            Debug.Log(TAG + "OnLoadStart");
             //todo... 씬 이동후  오브젝트 생성필요
             ModuleManager = GameObject.Find("ModuleManager");
             inGameCamera = GameObject.Find("ProjectionCamera").GetComponent<Camera_Controller>();
@@ -148,8 +137,6 @@ namespace JHchoi.Contents
             Init();
             ListSoundLoop.Add(StartCoroutine(SoundEffect()));
             SoundManager.Instance.PlaySound((int)SoundType.Mission_BGM);
-            //ListSoundLoop.Add(StartCoroutine(SoundBGM()));
-            //SoundManager.Instance.PlaySound((int)SoundType.Crowd_Effect);
             SensorSetting(new SensorSettingMsg());
             AddMessage();
             StartCoroutine(LoadingVideo());
@@ -198,8 +185,8 @@ namespace JHchoi.Contents
             {
                 InitTouchBall(i);
             }
-            SetTouchBall(inGameplayModel.PlayerNum);
 
+            SetTouchBall(inGameplayModel.PlayerNum);
             SetMissionObject(new SetMissionObjectMsg(playersModel.GetMissionModeNowMission(inGameplayModel.PlayerNum)));
         }
 

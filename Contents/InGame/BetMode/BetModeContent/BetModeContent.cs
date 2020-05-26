@@ -34,21 +34,6 @@ namespace JHchoi.Contents
 
         Vector3 force;
 
-        //[Header("<Test Input Sensor>")]
-        //public Vector3 firstSensor;
-        //public float firstTime;
-        //public Vector3 SecondSensor;
-        //public float secondTime;
-
-        //[Header("<Sensor Value>")]
-        //float sensorDistance;
-        //float forceScale;
-
-        SettingModel settingModel;
-        PlayersModel playersModel;
-        InGamePlayModel inGameplayModel;
-        BetModeModel betModeModel;
-        MissionLevelSettingModel levelSettingModel;
     
         Vector3 startPosition;
         Vector3 startRotation;
@@ -56,8 +41,8 @@ namespace JHchoi.Contents
         int totalPlayerCount;
         int totalPlayRound;
 
-        bool isPlayPossible;
-        public bool IsPlayPossible { get => isPlayPossible; set => isPlayPossible = value; }
+        //bool isPlayPossible;
+        //public bool IsPlayPossible { get => isPlayPossible; set => isPlayPossible = value; }
         //Vector3 vecTargetObj;
 
         //test
@@ -66,18 +51,18 @@ namespace JHchoi.Contents
         string tempSensor1;
         string tempSensor2;
 
+        BetModeModel bm;
+
         #region Contents Load
 
         protected override void OnLoadStart()
         {
-            //todo... 씬 이동후  오브젝트 생성필요
-            ModuleManager = GameObject.Find("ModuleManager");
-            inGameCamera = GameObject.Find("ProjectionCamera").GetComponent<Camera_Controller>();
-            inGameCamera.transform.parent = ModuleManager.transform;
-            UnityEngine.SceneManagement.SceneManager.LoadScene(3);
-            UI.IDialog.RequestDialogEnter<UI.LoadingDialog>();
-            Message.Send<LoadingModeInfoMsg>(new LoadingModeInfoMsg(ModeType.BetMode));
+
+            base.OnLoadStart();
             Debug.Log(TAG + "OnLoadStart");
+            bm = Model.First<BetModeModel>();
+            UnityEngine.SceneManagement.SceneManager.LoadScene(3);
+            Message.Send<LoadingModeInfoMsg>(new LoadingModeInfoMsg(ModeType.BetMode));
             StartCoroutine(LoadInitialData());
         }
 
@@ -91,11 +76,6 @@ namespace JHchoi.Contents
                     var inGameObject = Instantiate(o) as GameObject;
                     inGame = inGameObject;
                     inGame.transform.parent = ModuleManager.transform;
-                    inGameplayModel = Model.First<InGamePlayModel>();
-                    settingModel = Model.First<SettingModel>();
-                    playersModel = Model.First<PlayersModel>();
-                    levelSettingModel = Model.First<MissionLevelSettingModel>();
-                    betModeModel = Model.First<BetModeModel>();
                 }));
 
             path = "Object/GateBall/Arrow";
@@ -123,12 +103,13 @@ namespace JHchoi.Contents
 
         protected override void OnEnter()
         {
-            AddMessage();
+            base.OnEnter();
+
             Init();
             InitGameObjet();
             InitPlayerBall();
-            testMode1 = "목표물 : " + Gate1.name + " 미션 레벨 : " + inGameplayModel.BetLevel;
-            SetMissionObject(new SetMissionObjectMsg(MissionModeGame.Gate_1));
+            testMode1 = "목표물 : " + Gate1.name + " 미션 레벨 : " + igm.BetLevel;
+            MissionSetting(new SetMissionObjectMsg(MissionModeGame.Gate_1));
             ListSoundLoop.Add(StartCoroutine(Sound()));
             ListSoundLoop.Add(StartCoroutine(SoundWave()));
             SensorSetting(new SensorSettingMsg());
@@ -143,11 +124,11 @@ namespace JHchoi.Contents
 
         void Init()
         {
-            inGameplayModel.Round = 1;
-            inGameplayModel.PlayerNum = 0;
-            inGameplayModel.BetLevel = betModeModel.StartLV;
-            totalPlayerCount = inGameplayModel.TotalPlayerCount;
-            totalPlayRound = inGameplayModel.TotalPlayRound;
+            igm.Round = 1;
+            igm.PlayerNum = 0;
+            igm.BetLevel = bm.StartLV;
+            totalPlayerCount = igm.TotalPlayerCount;
+            totalPlayRound = igm.TotalPlayRound;
         }
 
         void InitGameObjet()
@@ -169,10 +150,10 @@ namespace JHchoi.Contents
                 Gate1.transform.localEulerAngles = new Vector3(0, 90, 0);
             }
 
-            Gate1.transform.localPosition = betModeModel.GetTargetPosition((BetStartPosition)startNum);
+            Gate1.transform.localPosition = bm.GetTargetPosition((BetStartPosition)startNum);
 
-            inGameCamera.SetPosition(betModeModel.GetStartPosition((BetStartPosition)startNum),
-                betModeModel.GetTargetPosition((BetStartPosition)startNum),
+            inGameCamera.SetPosition(bm.GetStartPosition((BetStartPosition)startNum),
+                bm.GetTargetPosition((BetStartPosition)startNum),
                 Vector3.zero);
 
             cameraPosition = inGameCamera.gameObject.transform.localPosition;
@@ -189,7 +170,7 @@ namespace JHchoi.Contents
             White_Ball = GameObject.Find("Prop_BALL02");
             White_Ball.AddComponent<BetModeBall_Controller>();
 
-            ballScale = Vector3.one * settingModel.BallScale;
+            ballScale = Vector3.one * sm.BallScale;
 
             red_Ball_Controller = Red_Ball.GetComponent<BetModeBall_Controller>();
             white_Ball_Controller = White_Ball.GetComponent<BetModeBall_Controller>(); ;
@@ -223,51 +204,12 @@ namespace JHchoi.Contents
             }
         }
 
-        void AddMessage()
+        protected override void SensorReady()
         {
-            Message.AddListener<T3SensorStartMsg>(OnSensorReady);
-            Message.AddListener<T3ResultMsg>(OnT3Result);
-            Message.AddListener<SensorSettingMsg>(SensorSetting);
-            Message.AddListener<TimeOutMsg>(TimeOut);
-            Message.AddListener<SetMissionObjectMsg>(SetMissionObject);
-            Message.AddListener<TurnChangeMsg>(TurnChange);
-            Message.AddListener<BallStopMsg>(BallStop);
-            Message.AddListener<MissionEndMsg>(MissionEnd);
-            Message.AddListener<MissionEffectMsg>(MissionEffect);
-            Message.AddListener<MissionTimerStartMsg>(MissionTimerStart);
-            //테스트
-            Message.AddListener<TempEditorSensorCheckMsg>(TempEditorSensorCheck);
-        }
-
-        void SensorSetting(SensorSettingMsg msg)
-        {
-            settingModel.LoadSetting();
-            //볼 셋팅
-            forceScale = settingModel.ForceScale;
-
-            //센서 셋팅
-            sensorDistance = settingModel.SensorDistance;
-            sensor1Scale = settingModel.Sensor1Scale;
-            sensor1Offset = settingModel.Sensor1Offset;
-            sensor2Scale = settingModel.Sensor2Scale;
-            sensor2Offset = settingModel.Sensor2Offset;
-        }
-
-        void OnSensorReady(T3SensorStartMsg msg)
-        {
-            IsPlayPossible = true;
             Message.Send<MissionTimerStartMsg>(new MissionTimerStartMsg(0));
         }
-
-        //물리센서에서 받은 값으로 스톤의 방향과 속도를 결정하는 프로세스
-        void OnT3Result(T3ResultMsg msg)
-        {
-            Log.Instance.log("OnT3Result");
-            if (IsPlayPossible)
-                InputSensor(msg.Datas[0].posX, msg.Datas[1].posX, msg.Datas[0].time, msg.Datas[1].time);
-        }
-
-        void InputSensor(float pos1, float pos2, float time1, float time2)
+     
+        protected override void InputSensor(float pos1, float pos2, float time1, float time2)
         {
             targetArrow.SetActive(false);
             IsPlayPossible = false;
@@ -321,7 +263,7 @@ namespace JHchoi.Contents
             GameObject tempBall;
             BetModeBall_Controller tempBallController;
 
-            if (inGameplayModel.PlayerNum % 2 == 0)
+            if (igm.PlayerNum % 2 == 0)
             {
                 tempBall = Red_Ball;
                 tempBallController = red_Ball_Controller;
@@ -340,19 +282,14 @@ namespace JHchoi.Contents
 
             Message.Send<CameraMoveMsg>(new CameraMoveMsg(tempBall, frontCamera.gameObject));
 
-            tempBallController.BallAddForce(startPos, force, inGameplayModel.BetModeMission);
+            tempBallController.BallAddForce(startPos, force, igm.BetModeMission);
         }
 
-        void TimeOut(TimeOutMsg msg)
+        protected override void MissionSetting(SetMissionObjectMsg msg)
         {
-            Message.Send<MissionEndMsg>(new MissionEndMsg(false));
-        }
-
-        void SetMissionObject(SetMissionObjectMsg msg)
-        {
-            int level = inGameplayModel.BetLevel;
-            if (level > betModeModel.MaxLV)
-                level = betModeModel.MaxLV;
+            int level = igm.BetLevel;
+            if (level > bm.MaxLV)
+                level = bm.MaxLV;
 
             int distance = 0;
             int position = 0;
@@ -361,31 +298,31 @@ namespace JHchoi.Contents
             int startNum = UnityEngine.Random.Range(0, 4);
 
             //카메라 배치
-            inGameCamera.SetPosition(betModeModel.GetStartPosition((BetStartPosition)startNum),
-              betModeModel.GetTargetPosition((BetStartPosition)startNum),
+            inGameCamera.SetPosition(bm.GetStartPosition((BetStartPosition)startNum),
+              bm.GetTargetPosition((BetStartPosition)startNum),
               Vector3.zero);
 
             GameObject Target = null;
             distance = UnityEngine.Random.Range(0, level);
-            if (distance > betModeModel.PlusZCount)
-                distance = betModeModel.PlusZCount;
+            if (distance > bm.PlusZCount)
+                distance = bm.PlusZCount;
             level -= distance;
 
             position = UnityEngine.Random.Range(0, level);
-            if (position > betModeModel.PlusXCount)
-                position = betModeModel.PlusXCount;
+            if (position > bm.PlusXCount)
+                position = bm.PlusXCount;
             level -= position;
 
 
             scale = UnityEngine.Random.Range(0, level);
-            if (scale > betModeModel.ScaleCount)
-                scale = betModeModel.ScaleCount;
+            if (scale > bm.ScaleCount)
+                scale = bm.ScaleCount;
             level -= scale;
 
             int mission;
-            if (level >= betModeModel.PoleLV)
+            if (level >= bm.PoleLV)
                 mission = UnityEngine.Random.Range(0, 3);
-            else if (level >= betModeModel.PoleLV && level < betModeModel.TouchLV)
+            else if (level >= bm.PoleLV && level < bm.TouchLV)
                 mission = UnityEngine.Random.Range(0, 2);
             else
                 mission = 0;
@@ -402,9 +339,9 @@ namespace JHchoi.Contents
 
             if (mission == 0)
             {
-                level -= betModeModel.GateLV;
+                level -= bm.GateLV;
                 Target = Gate1;
-                inGameplayModel.BetModeMission = BetModeGame.Gate_1;
+                igm.BetModeMission = BetModeGame.Gate_1;
 
                 if (startNum == 1 || startNum == 3)
                 {
@@ -417,10 +354,10 @@ namespace JHchoi.Contents
             }
             else if (mission == 1)
             {
-                level -= betModeModel.TouchLV;
-                inGameplayModel.BetModeMission = BetModeGame.Touch;
+                level -= bm.TouchLV;
+                igm.BetModeMission = BetModeGame.Touch;
 
-                if (inGameplayModel.PlayerNum % 2 == 0)
+                if (igm.PlayerNum % 2 == 0)
                 {
                     Target = White_Ball;
                 }
@@ -432,28 +369,28 @@ namespace JHchoi.Contents
             else if (mission == 2)
             {
                 Target = Pole;
-                level -= betModeModel.PoleLV;
-                inGameplayModel.BetModeMission = BetModeGame.Pole;
+                level -= bm.PoleLV;
+                igm.BetModeMission = BetModeGame.Pole;
             }
 
             if (level > 0)
                 distance += level;
 
-            if (distance > betModeModel.PlusZCount)
-                distance = betModeModel.PlusZCount;
+            if (distance > bm.PlusZCount)
+                distance = bm.PlusZCount;
 
             level -= distance;
 
             if (level > 0)
                 position += level;
 
-            testMode1 = "목표물 : " + Target.name + " 미션 레벨 : " + inGameplayModel.BetLevel;
+            testMode1 = "목표물 : " + Target.name + " 미션 레벨 : " + igm.BetLevel;
             Debug.Log("목표물 : " + Target.name);
             testMode2 = "스타팅 : " + startNum + " 거리 : " + distance + " 위치 : " + position + " 크기 : " + scale;
             Debug.Log("스타팅 : " + startNum + " 거리 : " + distance + " 위치 : " + position + " 크기 : " + scale);
 
             Target.SetActive(true);
-            Target.transform.localPosition = betModeModel.GetTargetPosition((BetStartPosition)startNum);
+            Target.transform.localPosition = bm.GetTargetPosition((BetStartPosition)startNum);
 
             int plusMinus = UnityEngine.Random.Range(0, 2);
             if (plusMinus == 0)
@@ -466,25 +403,25 @@ namespace JHchoi.Contents
                 //1 3
                 if (Target.transform.position.x > inGameCamera.transform.position.x)
                 {
-                    Target.transform.position = new Vector3(Target.transform.position.x + (distance * betModeModel.PlusZ),
+                    Target.transform.position = new Vector3(Target.transform.position.x + (distance * bm.PlusZ),
                         Target.transform.position.y,
                         Target.transform.position.z);
 
 
                     Target.transform.position = new Vector3(Target.transform.position.x,
                         Target.transform.position.y,
-                        Target.transform.position.z + (position * betModeModel.PlusX) * plusMinus);
+                        Target.transform.position.z + (position * bm.PlusX) * plusMinus);
                 }
                 else
                 {
-                    Target.transform.position = new Vector3(Target.transform.position.x - (distance * betModeModel.PlusZ),
+                    Target.transform.position = new Vector3(Target.transform.position.x - (distance * bm.PlusZ),
                         Target.transform.position.y,
                         Target.transform.position.z);
 
 
                     Target.transform.position = new Vector3(Target.transform.position.x,
                         Target.transform.position.y,
-                        Target.transform.position.z + (position * betModeModel.PlusX) * plusMinus);
+                        Target.transform.position.z + (position * bm.PlusX) * plusMinus);
                 }
             }
             else
@@ -494,10 +431,10 @@ namespace JHchoi.Contents
                 {
                     Target.transform.position = new Vector3(Target.transform.position.x,
                         Target.transform.position.y,
-                        Target.transform.position.z + (distance * betModeModel.PlusZ));
+                        Target.transform.position.z + (distance * bm.PlusZ));
 
 
-                    Target.transform.position = new Vector3(Target.transform.position.x + (position * betModeModel.PlusX) * plusMinus,
+                    Target.transform.position = new Vector3(Target.transform.position.x + (position * bm.PlusX) * plusMinus,
                         Target.transform.position.y,
                         Target.transform.position.z);
                 }
@@ -505,16 +442,16 @@ namespace JHchoi.Contents
                 {
                     Target.transform.position = new Vector3(Target.transform.position.x,
                       Target.transform.position.y,
-                      Target.transform.position.z - (distance * betModeModel.PlusZ));
+                      Target.transform.position.z - (distance * bm.PlusZ));
 
 
-                    Target.transform.position = new Vector3(Target.transform.position.x + (position * betModeModel.PlusX) * plusMinus,
+                    Target.transform.position = new Vector3(Target.transform.position.x + (position * bm.PlusX) * plusMinus,
                         Target.transform.position.y,
                         Target.transform.position.z);
                 }
             }
             // 2 0.1
-            Target.transform.localScale *= 1 - (scale * betModeModel.Scale);
+            Target.transform.localScale *= 1 - (scale * bm.Scale);
             targetScale = Target.transform.localScale;
             //카메라 위치 저장
             cameraPosition = inGameCamera.gameObject.transform.localPosition;
@@ -524,9 +461,8 @@ namespace JHchoi.Contents
             targetRotation = Target.transform.localEulerAngles;
         }
 
-        void TurnChange(TurnChangeMsg msg)
+        protected override void TurnEnd(TurnChangeMsg msg)
         {
-            Debug.Log("턴 체인지");
             GameObject temp_Start;
             GameObject temp_Target;
             BetModeBall_Controller temp_Start_Controller;
@@ -534,7 +470,7 @@ namespace JHchoi.Contents
             inGameCamera.gameObject.transform.localPosition = cameraPosition;
             inGameCamera.gameObject.transform.localEulerAngles = cameraRotation;
 
-            if (inGameplayModel.PlayerNum % 2 == 0)
+            if (igm.PlayerNum % 2 == 0)
             {
                 temp_Start = Red_Ball;
                 temp_Target = White_Ball;
@@ -550,7 +486,7 @@ namespace JHchoi.Contents
             temp_Start.transform.localScale = ballScale;
             temp_Start.SetActive(false);
 
-            if (inGameplayModel.BetModeMission == BetModeGame.Gate_1)
+            if (igm.BetModeMission == BetModeGame.Gate_1)
             {
                 temp_Target.SetActive(false);
                 Gate1.transform.localPosition = targetPosition;
@@ -560,7 +496,7 @@ namespace JHchoi.Contents
                 targetArrow.transform.position = Gate1.transform.position + new Vector3(0, 1.5f, 0);
                 missionEffet.transform.position = Gate1.transform.position + new Vector3(0, 2f, 0);
             }
-            else if (inGameplayModel.BetModeMission == BetModeGame.Touch)
+            else if (igm.BetModeMission == BetModeGame.Touch)
             {
                 temp_Target.SetActive(true);
                 temp_Target.transform.localPosition = targetPosition;
@@ -572,7 +508,7 @@ namespace JHchoi.Contents
                 targetArrow.transform.position = temp_Target.transform.position + new Vector3(0, 0.5f, 0);
                 missionEffet.transform.position = temp_Target.transform.position + new Vector3(0, 1f, 0);
             }
-            else if (inGameplayModel.BetModeMission == BetModeGame.Pole)
+            else if (igm.BetModeMission == BetModeGame.Pole)
             {
                 temp_Target.SetActive(false);
                 Pole.transform.localPosition = targetPosition;
@@ -587,17 +523,12 @@ namespace JHchoi.Contents
             temp_Start_Controller.isPlayerBall = true;
         }
 
-        private void BallStop(BallStopMsg msg)
-        {
-            playersModel.SetMissionStartPosition(inGameplayModel.PlayerNum, msg.ballPosition);
-        }
-
-        private void MissionEnd(MissionEndMsg msg)
+        protected override void MissionEndInfo(MissionEndMsg msg)
         {
             targetArrow.SetActive(false);
         }
 
-        private void MissionEffect(MissionEffectMsg msg)
+        protected override void MissionInfoEffect()
         {
             int num = UnityEngine.Random.Range(0, 3);
             missionEffet.SetActive(true);
@@ -612,10 +543,6 @@ namespace JHchoi.Contents
             missionEffet.transform.GetChild(num).gameObject.transform.LookAt(frontCamera.transform);
         }
 
-        private void MissionTimerStart(MissionTimerStartMsg msg)
-        {
-            targetArrow.SetActive(true);
-        }
 
         protected override void OnExit()
         {
@@ -623,24 +550,9 @@ namespace JHchoi.Contents
                 StopCoroutine(o);
 
             ListSoundLoop.Clear();
-            RemoveMessage();
+            //RemoveMessage();
         }
 
-        void RemoveMessage()
-        {
-            Message.RemoveListener<T3SensorStartMsg>(OnSensorReady);
-            Message.RemoveListener<T3ResultMsg>(OnT3Result);
-            Message.RemoveListener<SensorSettingMsg>(SensorSetting);
-            Message.RemoveListener<TimeOutMsg>(TimeOut);
-            Message.RemoveListener<SetMissionObjectMsg>(SetMissionObject);
-            Message.RemoveListener<TurnChangeMsg>(TurnChange);
-            Message.RemoveListener<BallStopMsg>(BallStop);
-            Message.RemoveListener<MissionEndMsg>(MissionEnd);
-            Message.RemoveListener<MissionEffectMsg>(MissionEffect);
-            Message.RemoveListener<MissionTimerStartMsg>(MissionTimerStart);
-            //테스트
-            Message.RemoveListener<TempEditorSensorCheckMsg>(TempEditorSensorCheck);
-        }
 
         protected override void OnUnload()
         {
@@ -674,7 +586,7 @@ namespace JHchoi.Contents
 
         private void OnGUI()
         {
-            if (settingModel != null && settingModel.IsTestMode)
+            if (sm != null && sm.IsTestMode)
             {
                 GUIStyle myStyle = new GUIStyle();
                 myStyle.normal.textColor = Color.red;

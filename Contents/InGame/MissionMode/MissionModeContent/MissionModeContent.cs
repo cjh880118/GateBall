@@ -33,51 +33,34 @@ namespace JHchoi.Contents
         Vector3 cameraRotation;
         Vector3 force;
 
-        //[Header("<Test Input Sensor>")]
-        //public Vector3 firstSensor;
-        //public float firstTime;
-        //public Vector3 SecondSensor;
-        //public float secondTime;
+        CameraModel cm;
 
-        //[Header("<Sensor Value>")]
-        //float sensorDistance;
-        //float forceScale;
-
-        SettingModel settingModel;
-        PlayersModel playersModel;
-        InGamePlayModel inGameplayModel;
-        CameraModel cameraModel;
-        MissionLevelSettingModel levelSettingModel;
-        TouchBallSettingModel touchBallSettingModel;
+        TouchBallSettingModel tbsm;
 
         Vector3 startPosition;
         Vector3 startRotation;
 
         int totalPlayerCount;
         int totalPlayRound;
-        bool isPlayPossible;
+        //bool isPlayPossible;
         float goalDistance;
 
-        public bool IsPlayPossible { get => isPlayPossible; set => isPlayPossible = value; }
-        
+        //public bool IsPlayPossible { get => isPlayPossible; set => isPlayPossible = value; }
+
         public float GoalDistance { get => goalDistance; set => goalDistance = value; }
 
 
-        
+
         #region Contents Load
 
         protected override void OnLoadStart()
         {
             base.OnLoadStart();
             Debug.Log(TAG + "OnLoadStart");
-            //todo... 씬 이동후  오브젝트 생성필요
-            ModuleManager = GameObject.Find("ModuleManager");
-            inGameCamera = GameObject.Find("ProjectionCamera").GetComponent<Camera_Controller>();
-            inGameCamera.transform.parent = ModuleManager.transform;
+            cm = Model.First<CameraModel>();
+            tbsm = Model.First<TouchBallSettingModel>();
             UnityEngine.SceneManagement.SceneManager.LoadScene(2);
-            UI.IDialog.RequestDialogEnter<UI.LoadingDialog>();
             Message.Send<LoadingModeInfoMsg>(new LoadingModeInfoMsg(ModeType.MissionMode));
-            Debug.Log(TAG + "OnLoadStart");
             StartCoroutine(LoadInitialData());
         }
 
@@ -91,13 +74,6 @@ namespace JHchoi.Contents
                     var inGameObject = Instantiate(o) as GameObject;
                     inGame = inGameObject;
                     inGame.transform.parent = ModuleManager.transform;
-                    inGameplayModel = Model.First<InGamePlayModel>();
-                    settingModel = Model.First<SettingModel>();
-                    playersModel = Model.First<PlayersModel>();
-                    cameraModel = Model.First<CameraModel>();
-                    levelSettingModel = Model.First<MissionLevelSettingModel>();
-                    touchBallSettingModel = Model.First<TouchBallSettingModel>();
-                    
                 }));
 
             path = "Object/GateBall/Arrow";
@@ -124,13 +100,10 @@ namespace JHchoi.Contents
         }
         #endregion
 
-        protected override void OnLoadComplete()
-        {
-            Debug.Log(TAG + "OnLoadComplete");
-        }
-
         protected override void OnEnter()
         {
+            base.OnEnter();
+
             InitGameObjet();
             InitPlayerBall();
             InitObjectPosition();
@@ -138,7 +111,6 @@ namespace JHchoi.Contents
             ListSoundLoop.Add(StartCoroutine(SoundEffect()));
             SoundManager.Instance.PlaySound((int)SoundType.Mission_BGM);
             SensorSetting(new SensorSettingMsg());
-            AddMessage();
             StartCoroutine(LoadingVideo());
         }
 
@@ -148,36 +120,26 @@ namespace JHchoi.Contents
             Message.Send<LoadingCompleteMsg>(new LoadingCompleteMsg());
         }
 
-        void AddMessage()
+        protected override void SensorReady()
         {
-            Message.AddListener<T3SensorStartMsg>(OnSensorReady);
-            Message.AddListener<T3ResultMsg>(OnT3Result);
-            Message.AddListener<SensorSettingMsg>(SensorSetting);
-            Message.AddListener<TimeOutMsg>(TimeOut);
-            Message.AddListener<SetMissionObjectMsg>(SetMissionObject);
-            Message.AddListener<TurnChangeMsg>(TurnChange);
-            Message.AddListener<BallStopMsg>(BallStop);
-            Message.AddListener<MissionEndMsg>(MissionEnd);
-            Message.AddListener<MissionEffectMsg>(MissionEffect);
-            Message.AddListener<MissionTimerStartMsg>(MissionTimerStart);
-            //테스트
-            Message.AddListener<TempEditorSensorCheckMsg>(TempEditorSensorCheck);
+            Message.Send<MissionTimerStartMsg>(new MissionTimerStartMsg(GoalDistance));
         }
+
 
         void Init()
         {
             Debug.Log(TAG + "Init");
 
-            inGameCamera.Init(cameraModel.Start_Position, cameraModel.Start_Rotation);
+            inGameCamera.Init(cm.Start_Position, cm.Start_Rotation);
             inGameCamera.SetPositionReset();
-            inGameplayModel.Round = 1;
-            inGameplayModel.PlayerNum = 0;
-            totalPlayerCount = inGameplayModel.TotalPlayerCount;
-            totalPlayRound = inGameplayModel.TotalPlayRound;
+            igm.Round = 1;
+            igm.PlayerNum = 0;
+            totalPlayerCount = igm.TotalPlayerCount;
+            totalPlayRound = igm.TotalPlayRound;
             for (int i = 0; i < totalPlayerCount; i++)
             {
-                playersModel.InitMissionPlayerModel(i);
-                playersModel.SetMissionStartPosition(i, frontCamera.transform.position);
+                pm.InitMissionPlayerModel(i);
+                pm.SetMissionStartPosition(i, frontCamera.transform.position);
             }
             GoalDistance = Vector3.Distance(frontCamera.transform.position, Gate1.transform.position);
 
@@ -186,8 +148,8 @@ namespace JHchoi.Contents
                 InitTouchBall(i);
             }
 
-            SetTouchBall(inGameplayModel.PlayerNum);
-            SetMissionObject(new SetMissionObjectMsg(playersModel.GetMissionModeNowMission(inGameplayModel.PlayerNum)));
+            SetTouchBall(igm.PlayerNum);
+            MissionSetting(new SetMissionObjectMsg(pm.GetMissionModeNowMission(igm.PlayerNum)));
         }
 
         void InitGameObjet()
@@ -196,9 +158,9 @@ namespace JHchoi.Contents
             Red_Ball.AddComponent<MissionModeBall_Controller>();
             White_Ball = GameObject.Find("Prop_BALL02");
             White_Ball.AddComponent<MissionModeBall_Controller>();
-            Player_Touch_Ball = new GameObject[inGameplayModel.TotalPlayerCount];
+            Player_Touch_Ball = new GameObject[igm.TotalPlayerCount];
 
-            for (int i = 0; i < inGameplayModel.TotalPlayerCount; i++)
+            for (int i = 0; i < igm.TotalPlayerCount; i++)
             {
                 Player_Touch_Ball[i] = GameObject.Find("PlayerTouch" + (i + 1).ToString());
             }
@@ -228,29 +190,29 @@ namespace JHchoi.Contents
         void InitObjectPosition()
         {
             Level tempLevel;
-            tempLevel = inGameplayModel.PlayLevel;
+            tempLevel = igm.PlayLevel;
 
-            Gate1.transform.position = levelSettingModel.GetGate1Position(tempLevel);
-            Gate1.transform.eulerAngles = levelSettingModel.GetGate1Rotation(tempLevel);
-            Gate1.transform.localScale = levelSettingModel.GetGate1Scale(tempLevel);
+            Gate1.transform.position = lsm.GetGate1Position(tempLevel);
+            Gate1.transform.eulerAngles = lsm.GetGate1Rotation(tempLevel);
+            Gate1.transform.localScale = lsm.GetGate1Scale(tempLevel);
 
-            Gate2.transform.position = levelSettingModel.GetGate2Position(tempLevel);
-            Gate2.transform.eulerAngles = levelSettingModel.GetGate2Rotation(tempLevel);
-            Gate2.transform.localScale = levelSettingModel.GetGate2Scale(tempLevel);
+            Gate2.transform.position = lsm.GetGate2Position(tempLevel);
+            Gate2.transform.eulerAngles = lsm.GetGate2Rotation(tempLevel);
+            Gate2.transform.localScale = lsm.GetGate2Scale(tempLevel);
 
-            Gate3.transform.position = levelSettingModel.GetGate3Position(tempLevel);
-            Gate3.transform.eulerAngles = levelSettingModel.GetGate3Rotation(tempLevel);
-            Gate3.transform.localScale = levelSettingModel.GetGate3Scale(tempLevel);
+            Gate3.transform.position = lsm.GetGate3Position(tempLevel);
+            Gate3.transform.eulerAngles = lsm.GetGate3Rotation(tempLevel);
+            Gate3.transform.localScale = lsm.GetGate3Scale(tempLevel);
 
-            Pole.transform.position = levelSettingModel.GetPolePosition(tempLevel);
-            Pole.transform.localScale = levelSettingModel.GetPoleScale(tempLevel);
+            Pole.transform.position = lsm.GetPolePosition(tempLevel);
+            Pole.transform.localScale = lsm.GetPoleScale(tempLevel);
         }
 
         //완전 초기화 볼 생성 셋팅 파일에 오브젝트로 위치 전환 
         void InitTouchBall(int playerNum)
         {
-            Level tempLevel = inGameplayModel.PlayLevel;
-            int tempTouchBallCount = touchBallSettingModel.GetBallCount(tempLevel);
+            Level tempLevel = igm.PlayLevel;
+            int tempTouchBallCount = tbsm.GetBallCount(tempLevel);
 
             //볼 오브젝트 닫기
             for (int i = 0; i < Player_Touch_Ball[playerNum].transform.childCount; i++)
@@ -261,27 +223,27 @@ namespace JHchoi.Contents
             //터치볼 오브젝트 모델에 셋팅값으로 셋팅
             for (int i = 0; i < tempTouchBallCount; i++)
             {
-                playersModel.SetTouchBallPosition(playerNum, i, touchBallSettingModel.GetBallPosition(tempLevel, i));
+                pm.SetTouchBallPosition(playerNum, i, tbsm.GetBallPosition(tempLevel, i));
             }
 
             //실질적 볼 포지션 배치
             for (int i = 0; i < tempTouchBallCount; i++)
             {
-                Player_Touch_Ball[playerNum].transform.GetChild(i).gameObject.GetComponent<TouchBall_Controller>().Init(touchBallSettingModel.GetBallPosition(tempLevel, i));
+                Player_Touch_Ball[playerNum].transform.GetChild(i).gameObject.GetComponent<TouchBall_Controller>().Init(tbsm.GetBallPosition(tempLevel, i));
             }
         }
 
         void SetTouchBall(int playerNum)
         {
             //볼 오브젝트 열기
-            Level tempLevel = inGameplayModel.PlayLevel;
-            int tempTouchBallCount = touchBallSettingModel.GetBallCount(tempLevel);
+            Level tempLevel = igm.PlayLevel;
+            int tempTouchBallCount = tbsm.GetBallCount(tempLevel);
 
             for (int i = 0; i < totalPlayerCount; i++)
             {
                 for (int j = 0; j < tempTouchBallCount; j++)
                 {
-                    Player_Touch_Ball[i].transform.GetChild(j).localScale = new Vector3(settingModel.BallScale, settingModel.BallScale, settingModel.BallScale);
+                    Player_Touch_Ball[i].transform.GetChild(j).localScale = new Vector3(sm.BallScale, sm.BallScale, sm.BallScale);
                     Player_Touch_Ball[i].transform.GetChild(j).gameObject.SetActive(false);
                 }
             }
@@ -291,7 +253,7 @@ namespace JHchoi.Contents
                 if (!Player_Touch_Ball[playerNum].transform.GetChild(i).gameObject.GetComponent<TouchBall_Controller>().isTouch)
                     Player_Touch_Ball[playerNum].transform.GetChild(i).gameObject.SetActive(true);
                 else
-                    playersModel.RemoveTouchBallPostion(playerNum, i);
+                    pm.RemoveTouchBallPostion(playerNum, i);
             }
         }
 
@@ -314,35 +276,8 @@ namespace JHchoi.Contents
             }
         }
 
-        void SensorSetting(SensorSettingMsg msg)
-        {
-            settingModel.LoadSetting();
-            //볼 셋팅
-            forceScale = settingModel.ForceScale;
 
-            //센서 셋팅
-            sensorDistance = settingModel.SensorDistance;
-            sensor1Scale = settingModel.Sensor1Scale;
-            sensor1Offset = settingModel.Sensor1Offset;
-            sensor2Scale = settingModel.Sensor2Scale;
-            sensor2Offset = settingModel.Sensor2Offset;
-        }
-
-        void OnSensorReady(T3SensorStartMsg msg)
-        {
-            IsPlayPossible = true;
-            Message.Send<MissionTimerStartMsg>(new MissionTimerStartMsg(GoalDistance));
-        }
-
-        //물리센서에서 받은 값으로 스톤의 방향과 속도를 결정하는 프로세스
-        void OnT3Result(T3ResultMsg msg)
-        {
-            Log.Instance.log("OnT3Result");
-            if (IsPlayPossible)
-                InputSensor(msg.Datas[0].posX, msg.Datas[1].posX, msg.Datas[0].time, msg.Datas[1].time);
-        }
-
-        void InputSensor(float pos1, float pos2, float time1, float time2)
+        protected override void InputSensor(float pos1, float pos2, float time1, float time2)
         {
             targetArrow.SetActive(false);
             IsPlayPossible = false;
@@ -383,7 +318,7 @@ namespace JHchoi.Contents
             if (Physics.Raycast(ray, out rHit, 1 << LayerMask.NameToLayer("Ground")))
             {
                 //0.0415 = 스케일1일때 공 크기  (현재스케일 5).
-                startPos = rHit.point - ray.direction * (settingModel.BallScale * 0.0415f);
+                startPos = rHit.point - ray.direction * (sm.BallScale * 0.0415f);
             }
             dir.y = 0f;
             dir = dir.normalized;
@@ -403,7 +338,7 @@ namespace JHchoi.Contents
             GameObject tempBall;
             MissionModeBall_Controller tempBallController;
 
-            if (inGameplayModel.PlayerNum % 2 == 0)
+            if (igm.PlayerNum % 2 == 0)
             {
                 tempBall = Red_Ball;
                 tempBallController = red_Ball_Controller;
@@ -425,45 +360,40 @@ namespace JHchoi.Contents
 
             Message.Send<CameraMoveMsg>(new CameraMoveMsg(tempBall, frontCamera.gameObject));
             //StartCoroutine(BallDistance(tempBall, frontCamera.gameObject));
-            tempBallController.BallAddForce(startPos, force, playersModel.GetMissionModeNowMission(inGameplayModel.PlayerNum));
+            tempBallController.BallAddForce(startPos, force, pm.GetMissionModeNowMission(igm.PlayerNum));
         }
 
-        void TimeOut(TimeOutMsg msg)
+        protected override void MissionSetting(SetMissionObjectMsg msg)
         {
-            Message.Send<MissionEndMsg>(new MissionEndMsg(false));
-        }
-
-        void SetMissionObject(SetMissionObjectMsg msg)
-        {
-            if (playersModel.GetMissionModeNowMission(inGameplayModel.PlayerNum) == MissionModeGame.Gate_1)
+            if (pm.GetMissionModeNowMission(igm.PlayerNum) == MissionModeGame.Gate_1)
             {
-                inGameCamera.SetPosition(playersModel.GetMissionStartPosition(inGameplayModel.PlayerNum),
+                inGameCamera.SetPosition(pm.GetMissionStartPosition(igm.PlayerNum),
                     Gate1.transform.position, Vector3.zero);
 
                 GoalDistance = Vector3.Distance(frontCamera.transform.position,
                     Gate1.transform.position);
 
-//                targetArrow.SetActive(true);
+                //                targetArrow.SetActive(true);
                 targetArrow.transform.position = Gate1.transform.position + new Vector3(0, 1.5f, 0);
 
                 missionEffet.transform.parent = Gate1.transform;
             }
-            else if (playersModel.GetMissionModeNowMission(inGameplayModel.PlayerNum) == MissionModeGame.Gate_2)
+            else if (pm.GetMissionModeNowMission(igm.PlayerNum) == MissionModeGame.Gate_2)
             {
-                inGameCamera.SetPosition(playersModel.GetMissionStartPosition(inGameplayModel.PlayerNum),
+                inGameCamera.SetPosition(pm.GetMissionStartPosition(igm.PlayerNum),
                   Gate2.transform.position, Vector3.zero);
 
                 GoalDistance = Vector3.Distance(frontCamera.transform.position,
                     Gate2.transform.position);
 
-//                targetArrow.SetActive(true);
+                //                targetArrow.SetActive(true);
                 targetArrow.transform.position = Gate2.transform.position + new Vector3(0, 1.5f, 0);
 
                 missionEffet.transform.parent = Gate2.transform;
             }
-            else if (playersModel.GetMissionModeNowMission(inGameplayModel.PlayerNum) == MissionModeGame.Gate_3)
+            else if (pm.GetMissionModeNowMission(igm.PlayerNum) == MissionModeGame.Gate_3)
             {
-                inGameCamera.SetPosition(playersModel.GetMissionStartPosition(inGameplayModel.PlayerNum),
+                inGameCamera.SetPosition(pm.GetMissionStartPosition(igm.PlayerNum),
                     Gate3.transform.position, Vector3.zero);
 
                 GoalDistance = Vector3.Distance(frontCamera.transform.position,
@@ -474,9 +404,9 @@ namespace JHchoi.Contents
 
                 missionEffet.transform.parent = Gate3.transform;
             }
-            else if (playersModel.GetMissionModeNowMission(inGameplayModel.PlayerNum) == MissionModeGame.Pole)
+            else if (pm.GetMissionModeNowMission(igm.PlayerNum) == MissionModeGame.Pole)
             {
-                inGameCamera.SetPosition(playersModel.GetMissionStartPosition(inGameplayModel.PlayerNum),
+                inGameCamera.SetPosition(pm.GetMissionStartPosition(igm.PlayerNum),
                     Pole.transform.position, Vector3.zero);
 
                 GoalDistance = Vector3.Distance(frontCamera.transform.position, Pole.transform.position);
@@ -489,12 +419,13 @@ namespace JHchoi.Contents
             targetArrow.transform.LookAt(frontCamera.transform);
         }
 
-        void TurnChange(TurnChangeMsg msg)
+        protected override void TurnEnd(TurnChangeMsg msg)
         {
             GameObject temp_Start;
             GameObject temp_Target;
             MissionModeBall_Controller temp_Start_Controller;
-            if (inGameplayModel.PlayerNum % 2 == 0)
+
+            if (igm.PlayerNum % 2 == 0)
             {
                 temp_Start = Red_Ball;
                 temp_Target = White_Ball;
@@ -512,21 +443,16 @@ namespace JHchoi.Contents
             temp_Start_Controller.isPlayerBall = true;
 
             //터치볼 오브젝트 배치
-            SetTouchBall(inGameplayModel.PlayerNum);
+            SetTouchBall(igm.PlayerNum);
         }
 
-        private void BallStop(BallStopMsg msg)
-        {
-            playersModel.SetMissionStartPosition(inGameplayModel.PlayerNum, msg.ballPosition);
-        }
-
-        private void MissionEnd(MissionEndMsg msg)
+        protected override void MissionEndInfo(MissionEndMsg msg)
         {
             targetArrow.SetActive(false);
-            int tempPlayerNum = inGameplayModel.PlayerNum;
-            MissionModeGame tempMission = playersModel.GetMissionModeNowMission(tempPlayerNum);
-            Level tempLevel = inGameplayModel.PlayLevel;
-            int tempTouchBallCount = touchBallSettingModel.GetBallCount(tempLevel);
+            int tempPlayerNum = igm.PlayerNum;
+            MissionModeGame tempMission = pm.GetMissionModeNowMission(tempPlayerNum);
+            Level tempLevel = igm.PlayLevel;
+            int tempTouchBallCount = tbsm.GetBallCount(tempLevel);
             //미션 실패이고 첫번째 미션이면 터치볼 배치 리셋
             if (!msg.isSuccess && tempMission == MissionModeGame.Gate_1)
             {
@@ -538,16 +464,16 @@ namespace JHchoi.Contents
                 for (int i = 0; i < tempTouchBallCount; i++)
                 {
                     if (!Player_Touch_Ball[tempPlayerNum].transform.GetChild(i).gameObject.GetComponent<TouchBall_Controller>().isTouch)
-                        playersModel.SetTouchBallPosition(tempPlayerNum, i, Player_Touch_Ball[tempPlayerNum].transform.GetChild(i).transform.position);
+                        pm.SetTouchBallPosition(tempPlayerNum, i, Player_Touch_Ball[tempPlayerNum].transform.GetChild(i).transform.position);
                     else
                     {
-                        playersModel.RemoveTouchBallPostion(tempPlayerNum, i);
+                        pm.RemoveTouchBallPostion(tempPlayerNum, i);
                     }
                 }
             }
         }
 
-        private void MissionEffect(MissionEffectMsg msg)
+        protected override void MissionInfoEffect()
         {
             int num = Random.Range(0, 3);
             missionEffet.SetActive(true);
@@ -563,10 +489,6 @@ namespace JHchoi.Contents
             missionEffet.transform.GetChild(num).gameObject.transform.LookAt(frontCamera.transform);
         }
 
-        private void MissionTimerStart(MissionTimerStartMsg msg)
-        {
-            targetArrow.SetActive(true);
-        }
 
         protected override void OnExit()
         {
@@ -575,25 +497,10 @@ namespace JHchoi.Contents
 
             ListSoundLoop.Clear();
             SoundManager.Instance.StopSound((int)SoundType.Mission_BGM);
-            //SoundManager.Instance.StopSound((int)SoundType.Crowd_Effect);
-            RemoveMessage();
+         
         }
 
-        void RemoveMessage()
-        {
-            Message.RemoveListener<T3SensorStartMsg>(OnSensorReady);
-            Message.RemoveListener<T3ResultMsg>(OnT3Result);
-            Message.RemoveListener<SensorSettingMsg>(SensorSetting);
-            Message.RemoveListener<TimeOutMsg>(TimeOut);
-            Message.RemoveListener<SetMissionObjectMsg>(SetMissionObject);
-            Message.RemoveListener<TurnChangeMsg>(TurnChange);
-            Message.RemoveListener<BallStopMsg>(BallStop);
-            Message.RemoveListener<MissionEndMsg>(MissionEnd);
-            Message.RemoveListener<MissionEffectMsg>(MissionEffect);
-            Message.RemoveListener<MissionTimerStartMsg>(MissionTimerStart);
-            //테스트
-            Message.RemoveListener<TempEditorSensorCheckMsg>(TempEditorSensorCheck);
-        }
+       
 
         protected override void OnUnload()
         {

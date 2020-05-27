@@ -96,17 +96,25 @@ namespace JHchoi.Contents
                     missionEffet.SetActive(false);
                 }));
 
+            GameObjFind();
             SetLoadComplete();
         }
         #endregion
 
+        void GameObjFind()
+        {
+            frontCamera = GameObject.Find("FrontEye").GetComponent<Camera>();
+            Red_Ball = GameObject.Find("Prop_BALL01");
+            White_Ball = GameObject.Find("Prop_BALL02");
+            Gate1 = GameObject.Find("GATE01");
+            Gate2 = GameObject.Find("GATE02");
+            Gate3 = GameObject.Find("GATE03");
+            Pole = GameObject.Find("PoleBase");
+        }
+
         protected override void OnEnter()
         {
             base.OnEnter();
-
-            InitGameObjet();
-            InitPlayerBall();
-            InitObjectPosition();
             Init();
             ListSoundLoop.Add(StartCoroutine(SoundEffect()));
             SoundManager.Instance.PlaySound((int)SoundType.Mission_BGM);
@@ -129,13 +137,14 @@ namespace JHchoi.Contents
         void Init()
         {
             Debug.Log(TAG + "Init");
-
             inGameCamera.Init(cm.Start_Position, cm.Start_Rotation);
             inGameCamera.SetPositionReset();
+            inGameCamera.SetPostProcessProfile(postProcessProfile);
             igm.Round = 1;
             igm.PlayerNum = 0;
             totalPlayerCount = igm.TotalPlayerCount;
             totalPlayRound = igm.TotalPlayRound;
+            
             for (int i = 0; i < totalPlayerCount; i++)
             {
                 pm.InitMissionPlayerModel(i);
@@ -149,32 +158,71 @@ namespace JHchoi.Contents
             }
 
             SetTouchBall(igm.PlayerNum);
+            InitPlayerBall();
+            InitObjectPosition();
             MissionSetting(new SetMissionObjectMsg(pm.GetMissionModeNowMission(igm.PlayerNum)));
         }
 
-        void InitGameObjet()
+        void InitTouchBall(int playerNum)
         {
-            Red_Ball = GameObject.Find("Prop_BALL01");
-            Red_Ball.AddComponent<MissionModeBall_Controller>();
-            White_Ball = GameObject.Find("Prop_BALL02");
-            White_Ball.AddComponent<MissionModeBall_Controller>();
+            Level tempLevel = igm.PlayLevel;
+            int tempTouchBallCount = tbsm.GetBallCount(tempLevel);
             Player_Touch_Ball = new GameObject[igm.TotalPlayerCount];
 
             for (int i = 0; i < igm.TotalPlayerCount; i++)
             {
                 Player_Touch_Ball[i] = GameObject.Find("PlayerTouch" + (i + 1).ToString());
             }
-            Gate1 = GameObject.Find("GATE01");
-            Gate2 = GameObject.Find("GATE02");
-            Gate3 = GameObject.Find("GATE03");
-            Pole = GameObject.Find("PoleBase");
 
-            inGameCamera.SetPostProcessProfile(postProcessProfile);
-            frontCamera = GameObject.Find("FrontEye").GetComponent<Camera>();
+            //볼 오브젝트 닫기
+            for (int i = 0; i < Player_Touch_Ball[playerNum].transform.childCount; i++)
+            {
+                Player_Touch_Ball[playerNum].transform.GetChild(i).gameObject.SetActive(false);
+            }
+
+            //터치볼 오브젝트 모델에 셋팅값으로 셋팅
+            for (int i = 0; i < tempTouchBallCount; i++)
+            {
+                pm.SetTouchBallPosition(playerNum, i, tbsm.GetBallPosition(tempLevel, i));
+            }
+
+            //실질적 볼 포지션 배치
+            for (int i = 0; i < tempTouchBallCount; i++)
+            {
+                Player_Touch_Ball[playerNum].transform.GetChild(i).gameObject.GetComponent<TouchBall_Controller>().Init(tbsm.GetBallPosition(tempLevel, i));
+            }
+        }
+
+
+
+        void SetTouchBall(int playerNum)
+        {
+            //볼 오브젝트 열기
+            Level tempLevel = igm.PlayLevel;
+            int tempTouchBallCount = tbsm.GetBallCount(tempLevel);
+
+            for (int i = 0; i < totalPlayerCount; i++)
+            {
+                for (int j = 0; j < tempTouchBallCount; j++)
+                {
+                    Player_Touch_Ball[i].transform.GetChild(j).localScale = new Vector3(sm.BallScale, sm.BallScale, sm.BallScale);
+                    Player_Touch_Ball[i].transform.GetChild(j).gameObject.SetActive(false);
+                }
+            }
+
+            for (int i = 0; i < tempTouchBallCount; i++)
+            {
+                if (!Player_Touch_Ball[playerNum].transform.GetChild(i).gameObject.GetComponent<TouchBall_Controller>().isTouch)
+                    Player_Touch_Ball[playerNum].transform.GetChild(i).gameObject.SetActive(true);
+                else
+                    pm.RemoveTouchBallPostion(playerNum, i);
+            }
         }
 
         void InitPlayerBall()
         {
+            Red_Ball.AddComponent<MissionModeBall_Controller>();
+            White_Ball.AddComponent<MissionModeBall_Controller>();
             red_Ball_Controller = Red_Ball.GetComponent<MissionModeBall_Controller>();
             white_Ball_Controller = White_Ball.GetComponent<MissionModeBall_Controller>(); ;
 
@@ -209,53 +257,7 @@ namespace JHchoi.Contents
         }
 
         //완전 초기화 볼 생성 셋팅 파일에 오브젝트로 위치 전환 
-        void InitTouchBall(int playerNum)
-        {
-            Level tempLevel = igm.PlayLevel;
-            int tempTouchBallCount = tbsm.GetBallCount(tempLevel);
-
-            //볼 오브젝트 닫기
-            for (int i = 0; i < Player_Touch_Ball[playerNum].transform.childCount; i++)
-            {
-                Player_Touch_Ball[playerNum].transform.GetChild(i).gameObject.SetActive(false);
-            }
-
-            //터치볼 오브젝트 모델에 셋팅값으로 셋팅
-            for (int i = 0; i < tempTouchBallCount; i++)
-            {
-                pm.SetTouchBallPosition(playerNum, i, tbsm.GetBallPosition(tempLevel, i));
-            }
-
-            //실질적 볼 포지션 배치
-            for (int i = 0; i < tempTouchBallCount; i++)
-            {
-                Player_Touch_Ball[playerNum].transform.GetChild(i).gameObject.GetComponent<TouchBall_Controller>().Init(tbsm.GetBallPosition(tempLevel, i));
-            }
-        }
-
-        void SetTouchBall(int playerNum)
-        {
-            //볼 오브젝트 열기
-            Level tempLevel = igm.PlayLevel;
-            int tempTouchBallCount = tbsm.GetBallCount(tempLevel);
-
-            for (int i = 0; i < totalPlayerCount; i++)
-            {
-                for (int j = 0; j < tempTouchBallCount; j++)
-                {
-                    Player_Touch_Ball[i].transform.GetChild(j).localScale = new Vector3(sm.BallScale, sm.BallScale, sm.BallScale);
-                    Player_Touch_Ball[i].transform.GetChild(j).gameObject.SetActive(false);
-                }
-            }
-
-            for (int i = 0; i < tempTouchBallCount; i++)
-            {
-                if (!Player_Touch_Ball[playerNum].transform.GetChild(i).gameObject.GetComponent<TouchBall_Controller>().isTouch)
-                    Player_Touch_Ball[playerNum].transform.GetChild(i).gameObject.SetActive(true);
-                else
-                    pm.RemoveTouchBallPostion(playerNum, i);
-            }
-        }
+       
 
         IEnumerator SoundEffect()
         {
@@ -497,10 +499,10 @@ namespace JHchoi.Contents
 
             ListSoundLoop.Clear();
             SoundManager.Instance.StopSound((int)SoundType.Mission_BGM);
-         
+
         }
 
-       
+
 
         protected override void OnUnload()
         {
@@ -525,9 +527,8 @@ namespace JHchoi.Contents
         }
 
         //에디터 테스트용
-        void TempEditorSensorCheck(TempEditorSensorCheckMsg msg)
+        protected override void EditSensorCheck()
         {
-            IsPlayPossible = true;
             Message.Send<MissionTimerStartMsg>(new MissionTimerStartMsg(GoalDistance));
         }
 

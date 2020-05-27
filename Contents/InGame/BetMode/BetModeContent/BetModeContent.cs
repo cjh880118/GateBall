@@ -34,7 +34,7 @@ namespace JHchoi.Contents
 
         Vector3 force;
 
-    
+
         Vector3 startPosition;
         Vector3 startRotation;
 
@@ -97,14 +97,23 @@ namespace JHchoi.Contents
                     missionEffet.transform.parent = inGame.transform;
                     missionEffet.SetActive(false);
                 }));
+
+            GameObjFind();
             SetLoadComplete();
         }
         #endregion
+        void GameObjFind()
+        {
+            Gate1 = GameObject.Find("GATE01");
+            Pole = GameObject.Find("PoleBase");
+            frontCamera = GameObject.Find("FrontEye").GetComponent<Camera>();
+            Red_Ball = GameObject.Find("Prop_BALL01");
+            White_Ball = GameObject.Find("Prop_BALL02");
+        }
 
         protected override void OnEnter()
         {
             base.OnEnter();
-
             Init();
             InitGameObjet();
             InitPlayerBall();
@@ -133,15 +142,14 @@ namespace JHchoi.Contents
 
         void InitGameObjet()
         {
-            Gate1 = GameObject.Find("GATE01");
-            Pole = GameObject.Find("PoleBase");
+         
             gateScale = Gate1.transform.localScale;
             targetScale = Gate1.transform.localScale;
             poleScale = Pole.transform.localScale;
 
             Pole.SetActive(false);
             inGameCamera.SetPostProcessProfile(postProcessProfile);
-            frontCamera = GameObject.Find("FrontEye").GetComponent<Camera>();
+            
 
             //1 = Y 90   3 = y90
             int startNum = UnityEngine.Random.Range(0, 4);
@@ -165,9 +173,9 @@ namespace JHchoi.Contents
 
         void InitPlayerBall()
         {
-            Red_Ball = GameObject.Find("Prop_BALL01");
+           
             Red_Ball.AddComponent<BetModeBall_Controller>();
-            White_Ball = GameObject.Find("Prop_BALL02");
+            
             White_Ball.AddComponent<BetModeBall_Controller>();
 
             ballScale = Vector3.one * sm.BallScale;
@@ -208,7 +216,7 @@ namespace JHchoi.Contents
         {
             Message.Send<MissionTimerStartMsg>(new MissionTimerStartMsg(0));
         }
-     
+
         protected override void InputSensor(float pos1, float pos2, float time1, float time2)
         {
             targetArrow.SetActive(false);
@@ -577,9 +585,8 @@ namespace JHchoi.Contents
         }
 
         //에디터 테스트용
-        void TempEditorSensorCheck(TempEditorSensorCheckMsg msg)
+        protected override void EditSensorCheck()
         {
-            IsPlayPossible = true;
             Message.Send<MissionTimerStartMsg>(new MissionTimerStartMsg(0));
         }
 

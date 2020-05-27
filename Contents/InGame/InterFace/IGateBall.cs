@@ -161,7 +161,11 @@ namespace JHchoi.Contents
 
         private void TempEditorSensorCheck(TempEditorSensorCheckMsg msg)
         {
+            IsPlayPossible = true;
+            EditSensorCheck();
         }
+
+        protected abstract void EditSensorCheck();
     
         protected override void OnExit()
         {

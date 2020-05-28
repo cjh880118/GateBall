@@ -114,13 +114,10 @@ namespace JHchoi.Contents
         protected override void OnEnter()
         {
             base.OnEnter();
-            Init();
-            InitGameObjet();
-            InitPlayerBall();
-            testMode1 = "목표물 : " + Gate1.name + " 미션 레벨 : " + igm.BetLevel;
-            MissionSetting(new SetMissionObjectMsg(MissionModeGame.Gate_1));
             ListSoundLoop.Add(StartCoroutine(Sound()));
             ListSoundLoop.Add(StartCoroutine(SoundWave()));
+            testMode1 = "목표물 : " + Gate1.name + " 미션 레벨 : " + igm.BetLevel;
+            MissionSetting(new SetMissionObjectMsg(MissionModeGame.Gate_1));
             SensorSetting(new SensorSettingMsg());
             StartCoroutine(LoadingVideo());
         }
@@ -131,25 +128,19 @@ namespace JHchoi.Contents
             Message.Send<LoadingCompleteMsg>(new LoadingCompleteMsg());
         }
 
-        void Init()
+        protected override void InitContent()
         {
             igm.Round = 1;
             igm.PlayerNum = 0;
             igm.BetLevel = bm.StartLV;
             totalPlayerCount = igm.TotalPlayerCount;
             totalPlayRound = igm.TotalPlayRound;
-        }
-
-        void InitGameObjet()
-        {
-         
             gateScale = Gate1.transform.localScale;
             targetScale = Gate1.transform.localScale;
             poleScale = Pole.transform.localScale;
-
             Pole.SetActive(false);
+
             inGameCamera.SetPostProcessProfile(postProcessProfile);
-            
 
             //1 = Y 90   3 = y90
             int startNum = UnityEngine.Random.Range(0, 4);
@@ -169,23 +160,19 @@ namespace JHchoi.Contents
 
             targetPosition = Gate1.transform.localPosition;
             targetRotation = Gate1.transform.localEulerAngles;
+            InitPlayerBall();
         }
+
 
         void InitPlayerBall()
         {
-           
             Red_Ball.AddComponent<BetModeBall_Controller>();
-            
             White_Ball.AddComponent<BetModeBall_Controller>();
-
             ballScale = Vector3.one * sm.BallScale;
-
             red_Ball_Controller = Red_Ball.GetComponent<BetModeBall_Controller>();
             white_Ball_Controller = White_Ball.GetComponent<BetModeBall_Controller>(); ;
-
             red_Ball_Controller.Init(Gate1.transform.position);
             white_Ball_Controller.Init(Gate1.transform.position);
-
             Red_Ball.SetActive(false);
             red_Ball_Controller.isPlayerBall = true;
             White_Ball.SetActive(false);
@@ -554,6 +541,8 @@ namespace JHchoi.Contents
 
         protected override void OnExit()
         {
+            base.OnExit();
+
             foreach (var o in ListSoundLoop)
                 StopCoroutine(o);
 

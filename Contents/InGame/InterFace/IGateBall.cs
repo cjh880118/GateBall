@@ -65,7 +65,7 @@ namespace JHchoi.Contents
         protected override void OnEnter()
         {
             Debug.Log(TAG + "OnEnter");
-            AddMessage();
+            InitContent();
         }
 
         protected void AddMessage()
@@ -83,6 +83,8 @@ namespace JHchoi.Contents
             //테스트
             Message.AddListener<TempEditorSensorCheckMsg>(TempEditorSensorCheck);
         }
+
+        protected abstract void InitContent();
 
         protected void SensorSetting(SensorSettingMsg msg)
         {

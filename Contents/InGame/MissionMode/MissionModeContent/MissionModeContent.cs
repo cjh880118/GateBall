@@ -115,7 +115,6 @@ namespace JHchoi.Contents
         protected override void OnEnter()
         {
             base.OnEnter();
-            Init();
             ListSoundLoop.Add(StartCoroutine(SoundEffect()));
             SoundManager.Instance.PlaySound((int)SoundType.Mission_BGM);
             SensorSetting(new SensorSettingMsg());
@@ -133,10 +132,9 @@ namespace JHchoi.Contents
             Message.Send<MissionTimerStartMsg>(new MissionTimerStartMsg(GoalDistance));
         }
 
-
-        void Init()
+        protected override void InitContent()
         {
-            Debug.Log(TAG + "Init");
+            Debug.Log(TAG + "InitContent");
             inGameCamera.Init(cm.Start_Position, cm.Start_Rotation);
             inGameCamera.SetPositionReset();
             inGameCamera.SetPostProcessProfile(postProcessProfile);
@@ -494,15 +492,14 @@ namespace JHchoi.Contents
 
         protected override void OnExit()
         {
+            base.OnExit();
+
             foreach (var o in ListSoundLoop)
                 StopCoroutine(o);
 
             ListSoundLoop.Clear();
             SoundManager.Instance.StopSound((int)SoundType.Mission_BGM);
-
         }
-
-
 
         protected override void OnUnload()
         {

@@ -35,23 +35,23 @@ namespace JHchoi.Contents
 
         protected override void ResultClose(bool isSuccess)
         {
-            int tempPlayerNum = inGameplayModel.PlayerNum;
-            MissionModeGame tempMission = playersModel.GetMissionModeNowMission(tempPlayerNum);
+            int playerNum = inGameplayModel.PlayerNum;
+            MissionModeGame nowMission = playersModel.GetMissionModeNowMission(playerNum);
             int tempPlayerChance = playersModel.GetMissionChance(inGameplayModel.PlayerNum);
             if (isSuccess)
             {
                 Debug.Log(TAG + "MissionEndPrecess : " + isSuccess);
-                if (tempMission == MissionModeGame.Gate_1
-                    || tempMission == MissionModeGame.Gate_2
-                    || tempMission == MissionModeGame.Gate_3)
+                if (nowMission == MissionModeGame.Gate_1
+                    || nowMission == MissionModeGame.Gate_2
+                    || nowMission == MissionModeGame.Gate_3)
                 {
-                    playersModel.SetMissionModeNowMission(tempPlayerNum, tempMission + 1);
+                    playersModel.SetMissionModeNowMission(playerNum, nowMission + 1);
                 }
             }
             else
             {
                 Debug.Log(TAG + "MissionEndPrecess : " + isSuccess);
-                playersModel.SetMissionChance(tempPlayerNum, tempPlayerChance - 1);
+                playersModel.SetMissionChance(playerNum, tempPlayerChance - 1);
             }
 
             Message.Send<SetScoreBoardUpdateMsg>(new SetScoreBoardUpdateMsg());
@@ -83,46 +83,43 @@ namespace JHchoi.Contents
             if (inGameplayModel.PlayerNum == totalPlayerCount - 1)
             {
                 //마지막 플레이 후 다음 플레이 가능 유저 탐색
-                int tempNum = 0;
+                int nextPlayer = 0;
                 while (true)
                 {
-                    if (playersModel.GetIsPlayPossible(tempNum))
+                    if (playersModel.GetIsPlayPossible(nextPlayer))
                     {
-                        Debug.Log(TAG + "Play Possible : " + tempNum);
+                        Debug.Log(TAG + "Play Possible : " + nextPlayer);
                         break;
                     }
                     else
-                        tempNum++;
+                        nextPlayer++;
                 }
-                inGameplayModel.PlayerNum = tempNum;
+                inGameplayModel.PlayerNum = nextPlayer;
             }
             else
             {
                 //플레이어 후 다음 플레이어가 플레이 가능한지 체크
-                int tempNum = inGameplayModel.PlayerNum + 1;
+                int nextPlayer = inGameplayModel.PlayerNum + 1;
                 while (true)
                 {
-                    if (playersModel.GetIsPlayPossible(tempNum))
+                    if (playersModel.GetIsPlayPossible(nextPlayer))
                     {
-                        Debug.Log(TAG + "Play Possible : " + tempNum);
+                        Debug.Log(TAG + "Play Possible : " + nextPlayer);
                         break;
                     }
                     else
                     {
                         //2인 플레이 때는 0으로 고정이지만 추후 플레이어 증가할 대비
-                        tempNum++;
-                        if (tempNum > totalPlayerCount - 1)
+                        nextPlayer++;
+                        if (nextPlayer > totalPlayerCount - 1)
                         {
-                            tempNum = 0;
+                            nextPlayer = 0;
                         }
                     }
                 }
-                inGameplayModel.PlayerNum = tempNum;
+                inGameplayModel.PlayerNum = nextPlayer;
             }
             Message.Send<TurnChangeMsg>(new TurnChangeMsg());
         }
-
-
-       
     }
 }

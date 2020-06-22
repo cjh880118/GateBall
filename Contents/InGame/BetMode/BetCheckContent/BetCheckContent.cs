@@ -19,7 +19,6 @@ namespace JHchoi.Contents
             Debug.Log(TAG + "OnLoadStart");
             betModeModel = Model.First<BetModeModel>();
             base.OnLoadStart();
-            //SetLoadComplete();
         }
 
         protected override void MissionResult(bool isSuccess)
@@ -32,13 +31,13 @@ namespace JHchoi.Contents
         protected override void ResultClose(bool isSuccess)
         {
             //내가 공을 치고 다음 플레이어가 현재 플레이 가능한지 체크
-            int tempPlayerNum = inGameplayModel.PlayerNum;
-            int tempRound = inGameplayModel.Round;
+            int playerNum = inGameplayModel.PlayerNum;
+            int nowRound = inGameplayModel.Round;
 
             //현재 라운드에 플레이 가능 유저 탐색
-            for (int i = tempPlayerNum + 1; i < totalPlayerCount; i++)
+            for (int i = playerNum + 1; i < totalPlayerCount; i++)
             {
-                if (playersModel.GetIsRoundPlayPossible(i, tempRound))
+                if (playersModel.GetIsRoundPlayPossible(i, nowRound))
                 {
                     inGameplayModel.PlayerNum = i;
                     Message.Send<TurnChangeMsg>(new TurnChangeMsg());
@@ -50,7 +49,7 @@ namespace JHchoi.Contents
             int tempPlayPossibleCount = 0;
             for (int i = 0; i < totalPlayerCount; i++)
             {
-                if (playersModel.GetIsRoundPlayPossible(i, tempRound + 1))
+                if (playersModel.GetIsRoundPlayPossible(i, nowRound + 1))
                 {
                     tempPlayPossibleCount++;
                 }
@@ -61,7 +60,7 @@ namespace JHchoi.Contents
             {
                 for (int i = 0; i < totalPlayerCount; i++)
                 {
-                    if (playersModel.GetIsRoundPlayPossible(i, tempRound + 1))
+                    if (playersModel.GetIsRoundPlayPossible(i, nowRound + 1))
                     {
                         inGameplayModel.PlayerNum = i;
                         inGameplayModel.BetLevel += betModeModel.LvUp;
@@ -85,7 +84,7 @@ namespace JHchoi.Contents
                 int num = 100;
                 for (int i = 0; i < totalPlayerCount; i++)
                 {
-                    if (playersModel.GetIsRoundPlayPossible(i, tempRound))
+                    if (playersModel.GetIsRoundPlayPossible(i, nowRound))
                     {
                         if (num == 100)
                             num = i;

@@ -164,14 +164,6 @@ namespace JHchoi.Models
             }
         }
 
-        //public Vector3 StartPosition1 { get => startPosition1; set => startPosition1 = value; }
-        //public Vector3 TargetPosition1 { get => targetPosition1; set => targetPosition1 = value; }
-        //public Vector3 StartPosition2 { get => startPosition2; set => startPosition2 = value; }
-        //public Vector3 TargetPosition2 { get => targetPosition2; set => targetPosition2 = value; }
-        //public Vector3 StartPosition3 { get => startPosition3; set => startPosition3 = value; }
-        //public Vector3 TargetPosition3 { get => targetPosition3; set => targetPosition3 = value; }
-        //public Vector3 StartPosition4 { get => startPosition4; set => startPosition4 = value; }
-        //public Vector3 TargetPosition4 { get => targetPosition4; set => targetPosition4 = value; }
         public float PlusX { get => plusX; set => plusX = value; }
         public int PlusXCount { get => plusXCount; set => plusXCount = value; }
         public float PlusZ { get => plusZ; set => plusZ = value; }

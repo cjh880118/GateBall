@@ -303,8 +303,8 @@ namespace JHchoi.Contents
             Message.Send<SensorValueMsg>(new SensorValueMsg(pos1, pos2, fixpos1, fixpos2));
 
             Vector3 firstVec = new Vector3(fixpos1, 0, 0);
-            Vector3 secondtVec = new Vector3(fixpos2, 0, sensorDistance);
-            Vector3 dir = secondtVec - firstVec;
+            Vector3 secondVec = new Vector3(fixpos2, 0, sensorDistance);
+            Vector3 dir = secondVec - firstVec;
 
             //todo..
             //Ray ray = Camera.main.ViewportPointToRay(new Vector3(fixpos2, 0.05f));

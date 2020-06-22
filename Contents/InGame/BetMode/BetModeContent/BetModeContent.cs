@@ -212,7 +212,6 @@ namespace JHchoi.Contents
             float fixpos2 = (pos2 * sensor2Scale + sensor2Offset);
             Log.Instance.log("Input Senor1 value : " + pos1 + " / fix : " + fixpos1 + "Input Senor1 Time : " + time1);
             Log.Instance.log("Input Senor2 value : " + pos2 + " / fix : " + fixpos2 + "Input Senor2 Time : " + time2);
-
             tempSensor1 = "Input Senor1 value : " + Math.Truncate(pos1 * 100) / 100 + " / fix : " + Math.Truncate(fixpos1 * 100) / 100 + "Input Senor1 Time : " + Math.Truncate(time1 * 100) / 100;
             tempSensor2 = "Input Senor2 value : " + Math.Truncate(pos2 * 100) / 100 + " / fix : " + Math.Truncate(fixpos2 * 100) / 100 + "Input Senor2 Time : " + Math.Truncate(time2 * 100) / 100;
 
@@ -233,8 +232,8 @@ namespace JHchoi.Contents
             Message.Send<SensorValueMsg>(new SensorValueMsg(pos1, pos2, fixpos1, fixpos2));
 
             Vector3 firstVec = new Vector3(fixpos1, 0, 0);
-            Vector3 secondtVec = new Vector3(fixpos2, 0, sensorDistance);
-            Vector3 dir = secondtVec - firstVec;
+            Vector3 secondVec = new Vector3(fixpos2, 0, sensorDistance);
+            Vector3 dir = secondVec - firstVec;
 
             Ray ray = frontCamera.ViewportPointToRay(new Vector3(fixpos2, 0.05f));
             RaycastHit rHit;
@@ -246,6 +245,7 @@ namespace JHchoi.Contents
             {
                 startPos = rHit.point - ray.direction * 0.15f;
             }
+
             dir.y = 0f;
             dir = dir.normalized;
 

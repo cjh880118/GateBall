@@ -46,17 +46,17 @@ namespace JHchoi.Contents
             }
 
             //다음 플레이 가능유저가 없을시 라운드 증가 후 다음 라운드 플레이 가능 유저 수 파악
-            int tempPlayPossibleCount = 0;
+            int playPossibleCount = 0;
             for (int i = 0; i < totalPlayerCount; i++)
             {
                 if (playersModel.GetIsRoundPlayPossible(i, nowRound + 1))
                 {
-                    tempPlayPossibleCount++;
+                    playPossibleCount++;
                 }
             }
 
             //라운드 진행 가능 플레이어가 2명 이상이면 다음 라운드 진행
-            if (tempPlayPossibleCount >= 2)
+            if (playPossibleCount >= 2)
             {
                 for (int i = 0; i < totalPlayerCount; i++)
                 {
@@ -72,7 +72,7 @@ namespace JHchoi.Contents
                     }
                 }
             }
-            else if (tempPlayPossibleCount == 1)
+            else if (playPossibleCount == 1)
             {
                 //게임이 종료
                 Debug.Log(TAG + "배팅 모드 게임 종료");

@@ -62,11 +62,11 @@ namespace JHchoi.Contents
                 {
                     if (playersModel.GetIsRoundPlayPossible(i, nowRound + 1))
                     {
+                        //배팅 모드 종료
+                        //다음 라운드 진행
                         inGameplayModel.PlayerNum = i;
                         inGameplayModel.BetLevel += betModeModel.LvUp;
                         inGameplayModel.Round += 1;
-                        //배팅 모드 종료
-                        //다음 라운드 진행
                         Message.Send<BetModeGameEndMsg>(new BetModeGameEndMsg(false));
                         return;
                     }
@@ -75,12 +75,13 @@ namespace JHchoi.Contents
             else if (playPossibleCount == 1)
             {
                 //게임이 종료
-                Debug.Log(TAG + "배팅 모드 게임 종료");
+                Debug.Log(TAG + "내기 모드 게임 종료");
                 Message.Send<BetModeGameEndMsg>(new BetModeGameEndMsg(true));
             }
             else
             {
                 //모두 탈락시 현재 라운드 다시 
+                Debug.Log(TAG + "모두 탈락");
                 int num = 100;
                 for (int i = 0; i < totalPlayerCount; i++)
                 {
@@ -101,8 +102,6 @@ namespace JHchoi.Contents
 
                 inGameplayModel.Round += 1;
                 inGameplayModel.PlayerNum = num;
-
-                Debug.Log(TAG + "모두 탈락");
                 Message.Send<BetModeGameEndMsg>(new BetModeGameEndMsg(false));
             }
         }

@@ -173,12 +173,15 @@ namespace JHchoi.Contents
         //미션 알림 표시
         void MissionInfoClose(MissionInfoCloseMsg msg)
         {
+            Debug.Log(TAG + "MissionInfoClose");
             StartCoroutine(SensorStart());
         }
 
         IEnumerator SensorStart()
         {
+            
             yield return new WaitForSeconds(2.0f);
+            Debug.Log(TAG + "SensorStart");
             Message.Send<T3SensorCatchMsg>(new T3SensorCatchMsg(true));
 #if (UNITY_EDITOR)
             Message.Send<TempEditorSensorCheckMsg>(new TempEditorSensorCheckMsg());
@@ -199,6 +202,7 @@ namespace JHchoi.Contents
         void GateBallStart()
         {
             //todo..
+            Debug.Log(TAG + "GateBallStart");
             UI.IDialog.RequestDialogExit<UI.AlertDialog>();
 
             int tempPlayerNum = inGameplayModel.PlayerNum;

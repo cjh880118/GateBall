@@ -30,6 +30,7 @@ namespace JHchoi.Contents
 
             playersModel.SetMissionSuccess(tempPlayerNum, tempMission, isSuccess);
             playersModel.SetIsMissionSuccess(tempPlayerNum, isSuccess);
+            //Test
             Message.Send<SetBetBoardUpdateMsg>(new SetBetBoardUpdateMsg());
         }
 
@@ -37,13 +38,11 @@ namespace JHchoi.Contents
         {
             int playerNum = inGameplayModel.PlayerNum;
             MissionModeGame nowMission = playersModel.GetMissionModeNowMission(playerNum);
-            int tempPlayerChance = playersModel.GetMissionChance(inGameplayModel.PlayerNum);
+            int playerTryChance = playersModel.GetMissionChance(inGameplayModel.PlayerNum);
             if (isSuccess)
             {
                 Debug.Log(TAG + "MissionEndPrecess : " + isSuccess);
-                if (nowMission == MissionModeGame.Gate_1
-                    || nowMission == MissionModeGame.Gate_2
-                    || nowMission == MissionModeGame.Gate_3)
+                if (nowMission != MissionModeGame.Pole)
                 {
                     playersModel.SetMissionModeNowMission(playerNum, nowMission + 1);
                 }
@@ -51,7 +50,7 @@ namespace JHchoi.Contents
             else
             {
                 Debug.Log(TAG + "MissionEndPrecess : " + isSuccess);
-                playersModel.SetMissionChance(playerNum, tempPlayerChance - 1);
+                playersModel.SetMissionChance(playerNum, playerTryChance - 1);
             }
 
             Message.Send<SetScoreBoardUpdateMsg>(new SetScoreBoardUpdateMsg());

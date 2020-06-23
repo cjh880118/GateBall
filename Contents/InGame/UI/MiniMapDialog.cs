@@ -17,8 +17,6 @@ namespace JHchoi.UI
         public GameObject touchBall;
         public GameObject[] missionInfo;
 
-        //float max = 150;
-        //float min = -150;
         float maxWidht = 137.5f;
         float minWidth = -137.5f;
 
@@ -49,18 +47,18 @@ namespace JHchoi.UI
 
             missionInfo[(int)msg.mission].SetActive(true);
 
-            gate1.GetComponent<RectTransform>().localPosition = ObjectPostion(msg.dicMissionObject[MissionModeGame.Gate_1].Position);
+            gate1.GetComponent<RectTransform>().localPosition = miniMapPos(msg.dicMissionObject[MissionModeGame.Gate_1].Position);
             gate1.transform.localEulerAngles = ObjectRotation(msg.dicMissionObject[MissionModeGame.Gate_1].Rotation);
 
-            gate2.GetComponent<RectTransform>().localPosition = ObjectPostion(msg.dicMissionObject[MissionModeGame.Gate_2].Position);
+            gate2.GetComponent<RectTransform>().localPosition = miniMapPos(msg.dicMissionObject[MissionModeGame.Gate_2].Position);
             gate2.transform.localEulerAngles = ObjectRotation(msg.dicMissionObject[MissionModeGame.Gate_2].Rotation);
 
-            gate3.GetComponent<RectTransform>().localPosition = ObjectPostion(msg.dicMissionObject[MissionModeGame.Gate_3].Position);
+            gate3.GetComponent<RectTransform>().localPosition = miniMapPos(msg.dicMissionObject[MissionModeGame.Gate_3].Position);
             gate3.transform.localEulerAngles = ObjectRotation(msg.dicMissionObject[MissionModeGame.Gate_3].Rotation);
 
-            pole.GetComponent<RectTransform>().localPosition = ObjectPostion(msg.dicMissionObject[MissionModeGame.Pole].Position);
+            pole.GetComponent<RectTransform>().localPosition = miniMapPos(msg.dicMissionObject[MissionModeGame.Pole].Position);
 
-            playerBall.GetComponent<RectTransform>().localPosition = ObjectPostion(msg.ballPosition);
+            playerBall.GetComponent<RectTransform>().localPosition = miniMapPos(msg.ballPosition);
               
             for(int i = 0; i < touchBall.transform.childCount; i++)
             {
@@ -72,30 +70,26 @@ namespace JHchoi.UI
                 if (msg.dicTouchBall.ContainsKey(i))
                 {
                     touchBall.transform.GetChild(i).gameObject.SetActive(true);
-                    touchBall.transform.GetChild(i).gameObject.transform.localPosition = ObjectPostion(msg.dicTouchBall[i]);
+                    touchBall.transform.GetChild(i).gameObject.transform.localPosition = miniMapPos(msg.dicTouchBall[i]);
                 }
             }
         }
 
-        Vector3 ObjectPostion(Vector3 vec)
+        Vector3 miniMapPos(Vector3 worldPos)
         {
-            Vector3 tempVec3;
-            float tempX = SetPostionValueX(vec.x);
-            float tempY = SetPostionValueY(vec.y);
-            tempVec3 = new Vector3(tempX, tempY, 0);
-            return tempVec3;
+            Vector3 mapPos = new Vector3(); ;
+            mapPos = GetMinimapPos(worldPos);
+            return mapPos;
         }
 
-        float SetPostionValueX(float value)
+        Vector3 GetMinimapPos(Vector3 worldPos)
         {
-            return (value * (maxWidht - minWidth)) + minWidth;
+            Vector3 minimapPos = new Vector3();
+            minimapPos.x = (worldPos.x * (maxWidht - minWidth)) + minWidth;
+            minimapPos.y = (worldPos.y * (maxHeight - minHeight)) + minHeight;
+            return minimapPos;
         }
-
-        float SetPostionValueY(float value)
-        {
-            return (value * (maxHeight - minHeight)) + minHeight;
-        }
-
+    
         //3d y 2d z (-)
         Vector3 ObjectRotation(Vector3 vec3)
         {

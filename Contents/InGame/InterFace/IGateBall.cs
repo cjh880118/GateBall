@@ -66,6 +66,7 @@ namespace JHchoi.Contents
         {
             Debug.Log(TAG + "OnEnter");
             InitContent();
+            AddMessage();
         }
 
         protected void AddMessage()

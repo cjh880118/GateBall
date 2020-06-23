@@ -142,7 +142,7 @@ namespace JHchoi.Contents
             igm.PlayerNum = 0;
             totalPlayerCount = igm.TotalPlayerCount;
             totalPlayRound = igm.TotalPlayRound;
-            
+
             for (int i = 0; i < totalPlayerCount; i++)
             {
                 pm.InitMissionPlayerModel(i);
@@ -255,7 +255,7 @@ namespace JHchoi.Contents
         }
 
         //완전 초기화 볼 생성 셋팅 파일에 오브젝트로 위치 전환 
-       
+
 
         IEnumerator SoundEffect()
         {
@@ -448,6 +448,8 @@ namespace JHchoi.Contents
 
         protected override void MissionEndInfo(MissionEndMsg msg)
         {
+            Debug.Log(TAG + "MissionEndInfo");
+
             targetArrow.SetActive(false);
             int tempPlayerNum = igm.PlayerNum;
             MissionModeGame tempMission = pm.GetMissionModeNowMission(tempPlayerNum);
